@@ -1,6 +1,21 @@
 # Definition of Done
 
-- **Level 1:** safe deterministic loop with tests.
-- **Level 2:** one real kind/Prometheus or Kubernetes integration runs.
-- **Level 3:** alert → evidence → policy/approval → actual bounded remediation → recovery verification, including unsafe denial.
-- **Level 4:** reproducible local demo/CI, recovery controls and accurate executor labeling.
+# Portfolio Complete — Local-First Scope Gate
+
+- [ ] kind runs real faulty workloads, including multiple relevant failures such as bad deployment, CrashLoop, saturation, or dependency failure.
+- [ ] Prometheus and/or Alertmanager produces an incident signal; cluster evidence is collected through Kubernetes APIs.
+- [ ] Diagnosis uses observed evidence; deterministic policy remains authority and records preconditions/risk.
+- [ ] At least one bounded remediation changes real Kubernetes state and verification proves recovery.
+- [ ] Dangerous remediation is denied or approval-required; stale cluster state prevents old plan execution.
+- [ ] Failed remediation rolls back safely where relevant.
+- [ ] Cooldown, action/change budgets, repeated-incident protection, and lifecycle concurrency prevent loops.
+- [ ] Persistent audit and appropriate incident/remediation metrics are observable.
+- [ ] Reproducible alert → evidence → diagnosis → plan → policy → mutation → verification demo and meaningful unit/integration/E2E/failure tests pass with CI green.
+- [ ] README/status distinguish real kind execution from unexecuted cloud/multi-cluster adapters.
+
+## Maturity Levels
+
+- **FOUNDATION:** architecture and domain logic exist.
+- **PARTIALLY VALIDATED:** deterministic loop or integration evidence exists, but core cluster story is incomplete.
+- **LOCAL END-TO-END VALIDATED:** success path runs locally with material failure/recovery/observability gaps.
+- **PORTFOLIO COMPLETE — LOCAL-FIRST SCOPE:** all gates are executed with evidence.

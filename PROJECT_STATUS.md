@@ -4,6 +4,10 @@
 
 PARTIALLY VALIDATED
 
+## Maturity Model
+
+`FOUNDATION` → `PARTIALLY VALIDATED` → `LOCAL END-TO-END VALIDATED` → `PORTFOLIO COMPLETE — LOCAL-FIRST SCOPE`.
+
 ## Executed and Verified
 
 - Deterministic bad-deployment investigation, approval gate, bounded rollback and verification loop.
@@ -27,6 +31,15 @@ PARTIALLY VALIDATED
 ## Current P0 Objective
 
 Run an actual kind faulty workload from alert through guarded remediation and verification.
+
+## Completion Blockers
+
+- kind, Prometheus/Alertmanager, Kubernetes evidence collection, and actual bounded remediation are unexecuted.
+- Real failure scenarios, rollback, stale-plan/loop-prevention, audit persistence, and live observability evidence are missing.
+
+## Explicitly Unexecuted Production Adapters
+
+- Multi-cluster remediation, enterprise incident systems, and production cloud integrations.
 
 ## Last Validation
 

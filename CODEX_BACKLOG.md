@@ -1,4 +1,15 @@
+# Completion Target
+
+PORTFOLIO COMPLETE — LOCAL-FIRST SCOPE
+
+# Current Completion Blockers
+
+- Execute alert-driven kind remediation with observed evidence, bounded mutation, verification, and rollback.
+- Demonstrate dangerous denial, stale plan, loop prevention, and persistent audit/metrics.
+
 # P0 — Required for Portfolio Claim
+
+P0 blocks PORTFOLIO COMPLETE — LOCAL-FIRST SCOPE; do not choose P1/P2 work first.
 
 - Bootstrap kind with a faulty workload and Prometheus/Alertmanager alert.
 - Add Kubernetes read-only evidence collection.
