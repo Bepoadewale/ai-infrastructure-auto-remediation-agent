@@ -28,3 +28,6 @@ P0 blocks PORTFOLIO COMPLETE — LOCAL-FIRST SCOPE; do not choose P1/P2 work fir
 # P3 — Future / Cloud / Hardware
 
 - Multi-cluster and enterprise incident integrations.
+# Clean-Room Completion Blocker
+
+- [ ] Pass the full clean-room reproducibility gate: deterministic bootstrap, smoke, remediation and rollback demos, safe cleanup, a second clean bootstrap, and recorded evidence. Break this into focused P0 work only during the scheduled week.
