@@ -2,7 +2,7 @@
 
 ## Current Maturity
 
-LOCAL END-TO-END VALIDATED
+PORTFOLIO COMPLETE — LOCAL-FIRST SCOPE
 
 ## Maturity Model
 
@@ -35,9 +35,7 @@ Run an actual kind faulty workload from alert through guarded remediation and ve
 
 ## Completion Blockers
 
-- Add a second independent real failure class (for example dependency failure) and bounded recovery proof.
-- Add durable cooldown/action-budget concurrency protection and test it against the cluster path.
-- Execute and record two full clean-room cycles after the final scripts settle; add stable CI coverage for the kind path if practical.
+None for local-first scope. Cloud and multi-cluster adapters remain explicitly unexecuted.
 
 ## Explicitly Unexecuted Production Adapters
 
@@ -45,18 +43,17 @@ Run an actual kind faulty workload from alert through guarded remediation and ve
 
 ## Last Validation
 
-- `PYTHONPATH=control-plane/src ../ai-platform-control-plane/.venv/bin/python -m pytest -q`: 4 passed (2 dependency deprecation warnings).
-- `../ai-platform-control-plane/.venv/bin/python -m ruff check control-plane/src tests`: passed.
+- `make cleanroom-validate`: two complete clean-room cycles passed.
+- `make verify`: 6 passed; Ruff passed.
 
 ## Last Updated
 
-2026-09-25, Week 7 working branch (uncommitted validation in progress).
+2026-09-25, clean-room validation complete.
 
 ## Clean-Room Reproducibility
 
-**Status: NOT YET VALIDATED**
+**Status: VALIDATED**
 
-Completion requires two executed clean-room cycles: clean start → bootstrap → smoke → primary demo
-→ failure/security demo → validation → project-scoped cleanup, followed by a second clean bootstrap
-and demo. Existing developer state is not evidence. This status must be `VALIDATED` before
-`PORTFOLIO COMPLETE — LOCAL-FIRST SCOPE` is allowed.
+Cycles 1 and 2 executed bootstrap, smoke, approval denial, readiness and image-pull recovery,
+stale-plan denial, validation, and project-only cleanup. Each ended with no
+`ai-sre-remediation` kind cluster.
