@@ -1,5 +1,5 @@
 # Roadmap and validation boundaries
 
-Implemented: deterministic bad-deployment full loop, incident fingerprint deduplication, evidence-bound rule diagnosis, strict remediation catalog, production approval boundary, stale-plan protection, local executor verification and audit timeline.
+Executed locally: kind workload remediation, Prometheus alert evaluation, Kubernetes API evidence collection, SQLite-backed incident/plan/approval/audit state, bounded Kubernetes actions, readiness and image-pull recovery, stale-plan rejection, and clean-room reproducibility.
 
-Next: Kubernetes API executor with narrow RBAC, Prometheus/Alertmanager collection, CPU/crashloop/queue scenarios, OPA integration, SQLite persistence, metrics/traces/dashboard, CLI and optional LLM schema adapter. No real Kubernetes or LLM execution has been validated yet.
+P1 hardening: Alertmanager notification delivery, additional dependency/CPU/CrashLoop scenarios, OPA integration, a CLI, dashboards/traces, and optional LLM schema adapter. Multi-cluster and cloud incident-system integrations remain production adapters; no LLM execution is claimed.
