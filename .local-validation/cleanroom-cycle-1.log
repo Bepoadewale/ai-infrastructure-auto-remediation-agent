@@ -1,0 +1,103 @@
+clean-room cycle 1 started 2026-09-25T18:47:28Z
+./scripts/clean-local.sh
+Deleting cluster "ai-sre-remediation" ...
+Deleted nodes: ["ai-sre-remediation-control-plane"]
+clean-local: removed only ai-sre-remediation and project .local state
+./scripts/bootstrap-local.sh
+No kind clusters found.
+Creating cluster "ai-sre-remediation" ...
+ • Ensuring node image (kindest/node:v1.34.0) 🖼  ...
+ ✓ Ensuring node image (kindest/node:v1.34.0) 🖼
+ • Preparing nodes 📦   ...
+ ✓ Preparing nodes 📦 
+ • Writing configuration 📜  ...
+ ✓ Writing configuration 📜
+ • Starting control-plane 🕹️  ...
+ ✓ Starting control-plane 🕹️
+ • Installing CNI 🔌  ...
+ ✓ Installing CNI 🔌
+ • Installing StorageClass 💾  ...
+ ✓ Installing StorageClass 💾
+Set kubectl context to "kind-ai-sre-remediation"
+You can now use your cluster with:
+
+kubectl cluster-info --context kind-ai-sre-remediation
+
+Thanks for using kind! 😊
+#0 building with "desktop-linux" instance using docker driver
+
+#1 [internal] load build definition from Dockerfile.checkout
+#1 transferring dockerfile: 338B done
+#1 DONE 0.0s
+
+#2 [internal] load metadata for docker.io/library/python:3.12-slim
+#2 ...
+
+#3 [auth] library/python:pull token for registry-1.docker.io
+#3 DONE 0.0s
+
+#2 [internal] load metadata for docker.io/library/python:3.12-slim
+#2 DONE 1.9s
+
+#4 [internal] load .dockerignore
+#4 transferring context: 2B done
+#4 DONE 0.0s
+
+#5 [1/4] FROM docker.io/library/python:3.12-slim@sha256:2f17fc044b579bab302c2e8054d3a686e2cb9a83de48e70534b94cd8ebbe06a9
+#5 resolve docker.io/library/python:3.12-slim@sha256:2f17fc044b579bab302c2e8054d3a686e2cb9a83de48e70534b94cd8ebbe06a9 0.0s done
+#5 DONE 0.0s
+
+#6 [internal] load build context
+#6 transferring context: 72B done
+#6 DONE 0.0s
+
+#7 [2/4] WORKDIR /app
+#7 CACHED
+
+#8 [3/4] COPY local/checkout_fixture.py /app/checkout_fixture.py
+#8 CACHED
+
+#9 [4/4] RUN pip install --no-cache-dir fastapi==0.115.12 uvicorn==0.34.0 prometheus-client==0.21.1
+#9 CACHED
+
+#10 exporting to image
+#10 exporting layers done
+#10 exporting manifest sha256:250f0479c9d49f66bed337897bd3e33b2d260f135abbcbe7b010790ca190426d done
+#10 exporting config sha256:44b1bcf3d545d1b6df3da18f8d9fb9a24d00e206de018be7e4fec729df4ff5f8 done
+#10 exporting attestation manifest sha256:b753f0789f0551a76321ec005f972b706901368db29b547cab04b3459590837f done
+#10 exporting manifest list sha256:b3b2549832dda09088d0f3e2abb3ad8cee1430a707f1114457592be3f3b2f7ae done
+#10 naming to docker.io/library/autoremediation-checkout:local done
+#10 unpacking to docker.io/library/autoremediation-checkout:local done
+#10 DONE 0.0s
+
+View build details: docker-desktop://dashboard/build/desktop-linux/desktop-linux/0koi570qtki30pm8j9axw4hwe
+Image: "autoremediation-checkout:local" with ID "sha256:b3b2549832dda09088d0f3e2abb3ad8cee1430a707f1114457592be3f3b2f7ae" not yet present on node "ai-sre-remediation-control-plane", loading...
+namespace/sre-remediation created
+serviceaccount/checkout-api created
+serviceaccount/prometheus created
+clusterrole.rbac.authorization.k8s.io/sre-remediation-prometheus created
+clusterrolebinding.rbac.authorization.k8s.io/sre-remediation-prometheus created
+configmap/prometheus-config created
+service/checkout-api created
+service/prometheus created
+deployment.apps/checkout-api created
+deployment.apps/prometheus created
+Waiting for deployment "prometheus" rollout to finish: 0 of 1 updated replicas are available...
+deployment "prometheus" successfully rolled out
+deployment "checkout-api" successfully rolled out
+Bootstrap complete: kind=ai-sre-remediation, Prometheus=http://localhost:19090
+./scripts/smoke.sh
+smoke: kind, Prometheus, checkout fixture, and control plane are ready
+./scripts/demo-rollback.sh
+smoke: kind, Prometheus, checkout fixture, and control plane are ready
+deployment.apps/checkout-api env updated
+demo-rollback: production action was denied until a separate approval exists
+./scripts/demo-remediation.sh
+smoke: kind, Prometheus, checkout fixture, and control plane are ready
+demo-remediation: incident INC-ccda9b83 resolved after guarded Kubernetes rollback
+deployment "checkout-api" successfully rolled out
+./scripts/demo-image-recovery.sh
+smoke: kind, Prometheus, checkout fixture, and control plane are ready
+deployment.apps/checkout-api image updated
+curl: (22) The requested URL returned error: 409
+make[1]: *** [demo-image-recovery] Error 22

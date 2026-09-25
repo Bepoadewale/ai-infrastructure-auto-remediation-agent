@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import sqlite3
+import threading
 import time
 from pathlib import Path
 
@@ -13,11 +14,13 @@ class IncidentStore:
         self.path = Path(database_url)
         self.path.parent.mkdir(parents=True, exist_ok=True)
         self.connection = sqlite3.connect(self.path, check_same_thread=False)
+        self.lock = threading.Lock()
         self.connection.execute(
             "CREATE TABLE IF NOT EXISTS incidents (id TEXT PRIMARY KEY, fingerprint TEXT NOT NULL, status TEXT NOT NULL, payload TEXT NOT NULL)"
         )
         self.connection.execute("CREATE INDEX IF NOT EXISTS incidents_fingerprint ON incidents(fingerprint)")
         self.connection.execute("CREATE TABLE IF NOT EXISTS remediation_guards (service TEXT PRIMARY KEY, last_action REAL NOT NULL)")
+        self.connection.execute("CREATE TABLE IF NOT EXISTS remediation_actions (service TEXT NOT NULL, occurred_at REAL NOT NULL)")
         self.connection.commit()
 
     def save(self, incident: Incident) -> None:
@@ -42,11 +45,16 @@ class IncidentStore:
     def list(self) -> list[Incident]:
         return [Incident.model_validate_json(row[0]) for row in self.connection.execute("SELECT payload FROM incidents ORDER BY rowid")]
 
-    def reserve_remediation(self, service: str, cooldown_seconds: int = 30) -> bool:
+    def reserve_remediation(self, service: str, cooldown_seconds: int = 30, max_actions: int = 2, window_seconds: int = 300) -> tuple[bool, str]:
         now = time.time()
-        row = self.connection.execute("SELECT last_action FROM remediation_guards WHERE service=?", (service,)).fetchone()
-        if row and now - row[0] < cooldown_seconds:
-            return False
-        self.connection.execute("INSERT INTO remediation_guards(service,last_action) VALUES (?,?) ON CONFLICT(service) DO UPDATE SET last_action=excluded.last_action", (service, now))
-        self.connection.commit()
-        return True
+        with self.lock:
+            row = self.connection.execute("SELECT last_action FROM remediation_guards WHERE service=?", (service,)).fetchone()
+            if row and now - row[0] < cooldown_seconds:
+                return False, "remediation cooldown active"
+            count = self.connection.execute("SELECT COUNT(*) FROM remediation_actions WHERE service=? AND occurred_at>=?", (service, now - window_seconds)).fetchone()[0]
+            if count >= max_actions:
+                return False, "remediation action budget exhausted"
+            self.connection.execute("INSERT INTO remediation_guards(service,last_action) VALUES (?,?) ON CONFLICT(service) DO UPDATE SET last_action=excluded.last_action", (service, now))
+            self.connection.execute("INSERT INTO remediation_actions(service,occurred_at) VALUES (?,?)", (service, now))
+            self.connection.commit()
+        return True, "reserved"

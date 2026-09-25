@@ -167,9 +167,12 @@ def remediate(incident_id: str, principal: str = Depends(role)) -> Incident:
     if not executor.precondition(incident.plan):
         persist(incident, "STALE_PLAN_DENIED", principal)
         raise HTTPException(409, "stale plan precondition failed")
-    if not store.reserve_remediation(incident.service):
-        persist(incident, "COOLDOWN_DENIED", principal)
-        raise HTTPException(409, "remediation cooldown active")
+    reserved, reservation_reason = store.reserve_remediation(
+        incident.service, cooldown_seconds=int(os.getenv("SRE_COOLDOWN_SECONDS", "30"))
+    )
+    if not reserved:
+        persist(incident, "REMEDIATION_GUARD_DENIED", principal, reservation_reason)
+        raise HTTPException(409, reservation_reason)
     incident.status = IncidentStatus.REMEDIATING
     persist(incident, "REMEDIATION_STARTED", principal)
     try:

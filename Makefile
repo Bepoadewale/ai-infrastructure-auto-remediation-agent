@@ -1,7 +1,7 @@
 VENV ?= .venv
 PYTHON ?= $(VENV)/bin/python
 export PYTHONPATH := control-plane/src
-.PHONY: install test lint bootstrap-local smoke demo-remediation demo-rollback demo-image-recovery demo-stale-plan verify clean-local
+.PHONY: install test lint bootstrap-local smoke demo-remediation demo-rollback demo-image-recovery demo-stale-plan cleanroom-validate verify clean-local
 
 install:
 	@if [ -x $(VENV)/bin/python ] && ! $(VENV)/bin/python -c 'import sys; raise SystemExit(sys.version_info[:2] != (3, 12))'; then rm -rf $(VENV); fi
@@ -32,6 +32,9 @@ demo-image-recovery:
 
 demo-stale-plan:
 	./scripts/demo-stale-plan.sh
+
+cleanroom-validate:
+	./scripts/cleanroom-validate.sh
 
 verify: test lint
 
