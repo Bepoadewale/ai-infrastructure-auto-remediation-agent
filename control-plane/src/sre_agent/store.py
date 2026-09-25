@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import sqlite3
+import time
 from pathlib import Path
 
 from sre_agent.models.domain import Incident
@@ -16,6 +17,7 @@ class IncidentStore:
             "CREATE TABLE IF NOT EXISTS incidents (id TEXT PRIMARY KEY, fingerprint TEXT NOT NULL, status TEXT NOT NULL, payload TEXT NOT NULL)"
         )
         self.connection.execute("CREATE INDEX IF NOT EXISTS incidents_fingerprint ON incidents(fingerprint)")
+        self.connection.execute("CREATE TABLE IF NOT EXISTS remediation_guards (service TEXT PRIMARY KEY, last_action REAL NOT NULL)")
         self.connection.commit()
 
     def save(self, incident: Incident) -> None:
@@ -39,3 +41,12 @@ class IncidentStore:
 
     def list(self) -> list[Incident]:
         return [Incident.model_validate_json(row[0]) for row in self.connection.execute("SELECT payload FROM incidents ORDER BY rowid")]
+
+    def reserve_remediation(self, service: str, cooldown_seconds: int = 30) -> bool:
+        now = time.time()
+        row = self.connection.execute("SELECT last_action FROM remediation_guards WHERE service=?", (service,)).fetchone()
+        if row and now - row[0] < cooldown_seconds:
+            return False
+        self.connection.execute("INSERT INTO remediation_guards(service,last_action) VALUES (?,?) ON CONFLICT(service) DO UPDATE SET last_action=excluded.last_action", (service, now))
+        self.connection.commit()
+        return True

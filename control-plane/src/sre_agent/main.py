@@ -46,7 +46,7 @@ def persist(incident: Incident, name: str, principal: str = "system", detail: st
 
 
 def plan_digest(incident: Incident, plan: Plan) -> str:
-    stable = f"{incident.id}:{plan.action}:{plan.target}:{plan.namespace}:{plan.expected_resource_version}:{plan.expected_broken}:{plan.plan_version}"
+    stable = f"{incident.id}:{plan.action}:{plan.target}:{plan.namespace}:{plan.expected_resource_version}:{plan.expected_broken}:{plan.expected_image}:{plan.plan_version}"
     return hashlib.sha256(stable.encode()).hexdigest()
 
 
@@ -126,6 +126,7 @@ def plan(incident_id: str, principal: str = Depends(role)) -> Plan:
         "current_replicas": snapshot["replicas"],
         "expected_resource_version": snapshot["resource_version"],
         "expected_broken": snapshot["broken"],
+        "expected_image": snapshot["image"],
     })
     incident.plan.plan_hash = plan_digest(incident, incident.plan)
     incident.status = IncidentStatus.PLAN_PROPOSED
@@ -166,6 +167,9 @@ def remediate(incident_id: str, principal: str = Depends(role)) -> Incident:
     if not executor.precondition(incident.plan):
         persist(incident, "STALE_PLAN_DENIED", principal)
         raise HTTPException(409, "stale plan precondition failed")
+    if not store.reserve_remediation(incident.service):
+        persist(incident, "COOLDOWN_DENIED", principal)
+        raise HTTPException(409, "remediation cooldown active")
     incident.status = IncidentStatus.REMEDIATING
     persist(incident, "REMEDIATION_STARTED", principal)
     try:

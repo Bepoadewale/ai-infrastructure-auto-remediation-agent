@@ -25,3 +25,9 @@ def test_stale_plan_does_not_mutate():
     client.post(f"/api/v1/incidents/{incident}/investigate",headers=AGENT); client.post(f"/api/v1/incidents/{incident}/diagnose",headers=AGENT); client.post(f"/api/v1/incidents/{incident}/plan",headers=AGENT)
     executor.state["checkout-api"]["replicas"] = 7
     assert client.post(f"/api/v1/incidents/{incident}/remediate",headers=OP).status_code==409
+
+def test_remediation_guard_enforces_cooldown(tmp_path):
+    from sre_agent.store import IncidentStore
+    guard = IncidentStore(str(tmp_path / "guard.db"))
+    assert guard.reserve_remediation("checkout-api", cooldown_seconds=60)
+    assert not guard.reserve_remediation("checkout-api", cooldown_seconds=60)

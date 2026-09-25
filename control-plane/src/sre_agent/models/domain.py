@@ -15,6 +15,6 @@ class Evidence(BaseModel):
 class IncidentCreate(BaseModel):
     service: str; namespace: str; environment: str; alert_name: str; severity: str = "SEV2"; fingerprint: str
 class Plan(BaseModel):
-    action: str; target: str; namespace: str; current_replicas: int | None = None; desired_replicas: int | None = None; risk: Risk; reversible: bool; plan_version: int = 1; approved_by: str | None = None; expected_resource_version: str | None = None; expected_broken: bool | None = None; plan_hash: str | None = None
+    action: str; target: str; namespace: str; current_replicas: int | None = None; desired_replicas: int | None = None; risk: Risk; reversible: bool; plan_version: int = 1; approved_by: str | None = None; expected_resource_version: str | None = None; expected_broken: bool | None = None; expected_image: str | None = None; plan_hash: str | None = None
 class Incident(BaseModel):
     id: str; service: str; namespace: str; environment: str; alert_name: str; severity: str; fingerprint: str; status: IncidentStatus = IncidentStatus.DETECTED; created_at: datetime = Field(default_factory=lambda: datetime.now(UTC)); evidence: list[Evidence] = []; diagnosis: dict | None = None; plan: Plan | None = None; timeline: list[dict] = []

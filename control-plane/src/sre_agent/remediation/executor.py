@@ -28,6 +28,7 @@ class KubernetesExecutor:
             "replicas": deployment.spec.replicas or 0,
             "available": deployment.status.available_replicas or 0,
             "broken": broken,
+            "image": containers[0].image,
         }
 
     def precondition(self, plan: Plan) -> bool:
@@ -35,6 +36,7 @@ class KubernetesExecutor:
         return (
             (plan.expected_resource_version is None or state["resource_version"] == plan.expected_resource_version)
             and (plan.expected_broken is None or state["broken"] == plan.expected_broken)
+            and (plan.expected_image is None or state["image"] == plan.expected_image)
         )
 
     def evidence(self, service: str, namespace: str) -> list[dict[str, str]]:
@@ -43,7 +45,7 @@ class KubernetesExecutor:
         events = self.core.list_namespaced_event(namespace, field_selector=f"involvedObject.name={service}").items
         available = deployment.status.available_replicas or 0
         observations = [
-            {"type": "deployment", "source": f"deployment/{service}", "observation": f"available_replicas={available}; generation={deployment.metadata.generation}"},
+            {"type": "deployment", "source": f"deployment/{service}", "observation": f"{service} available_replicas={available}; generation={deployment.metadata.generation}"},
             {"type": "kubernetes_pods", "source": namespace, "observation": "; ".join(f"{pod.metadata.name}:{pod.status.phase}" for pod in pods) or "no pods found"},
         ]
         observations.append({"type": "kubernetes_event", "source": namespace, "observation": "; ".join(event.message or "" for event in events[-5:]) or "no deployment events"})
@@ -53,7 +55,7 @@ class KubernetesExecutor:
         if plan.action not in {"rollback_deployment", "scale_deployment", "restart_deployment", "delete_failed_pod"}:
             raise ValueError("unsupported remediation capability")
         if plan.action == "rollback_deployment":
-            body = {"spec": {"template": {"spec": {"containers": [{"name": "checkout", "env": [{"name": "BROKEN", "value": "0"}]}]}}}}
+            body = {"spec": {"template": {"spec": {"containers": [{"name": "checkout", "image": "autoremediation-checkout:local", "env": [{"name": "BROKEN", "value": "0"}]}]}}}}
             self.apps.patch_namespaced_deployment(plan.target, plan.namespace, body)
             return "patched allowlisted checkout health flag to verified previous-good value"
         if plan.action == "scale_deployment":
@@ -83,7 +85,7 @@ class LocalLabExecutor:
         item = self.state.get(plan.target); return bool(item and (plan.current_replicas is None or item["replicas"] == plan.current_replicas))
     def snapshot(self, plan: Plan) -> dict:
         item = self.state[plan.target]
-        return {"resource_version": f"local-{item['replicas']}-{item['healthy']}", "replicas": item["replicas"], "available": int(item["healthy"]), "broken": not item["healthy"]}
+        return {"resource_version": f"local-{item['replicas']}-{item['healthy']}", "replicas": item["replicas"], "available": int(item["healthy"]), "broken": not item["healthy"], "image": item.get("image", "local")}
     def evidence(self, service: str, namespace: str) -> list[dict[str, str]]: return [{"type": "metric", "source": "local-lab", "observation": "HTTP 5xx increased and readiness failed"}, {"type": "deployment", "source": service, "observation": "v2 deployed before error spike"}]
     def apply(self, plan: Plan) -> str:
         self.state[plan.target].update(revision="v1", healthy=True); return "local rollback"
