@@ -31,7 +31,7 @@ PORTFOLIO COMPLETE — LOCAL-FIRST SCOPE
 
 ## Current P0 Objective
 
-Run an actual kind faulty workload from alert through guarded remediation and verification.
+None. The local-first completion gate is satisfied; next work is P1 hardening.
 
 ## Completion Blockers
 
