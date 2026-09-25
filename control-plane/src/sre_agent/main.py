@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import hashlib
 import os
+import sys
 import time
 from datetime import UTC, datetime
 from uuid import uuid4
@@ -17,7 +18,8 @@ from sre_agent.telemetry import ACTIONS, INCIDENTS, PLANS, VERIFY_SECONDS
 
 app = FastAPI(title="Governed AI SRE Auto-Remediation", version="0.2.0")
 app.mount("/metrics", make_asgi_app())
-store = IncidentStore(os.getenv("SRE_DATABASE", ".local/remediation.db"))
+default_database = ":memory:" if "pytest" in sys.modules else ".local/remediation.db"
+store = IncidentStore(os.getenv("SRE_DATABASE", default_database))
 executor = LocalLabExecutor() if os.getenv("SRE_EXECUTOR", "local") == "local" else KubernetesExecutor()
 
 
