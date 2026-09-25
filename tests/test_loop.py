@@ -1,8 +1,17 @@
+import pytest
 from fastapi.testclient import TestClient
-from sre_agent.main import app, executor
+from sre_agent.main import app, executor, store
 
 client=TestClient(app)
 AGENT={"Authorization":"Bearer agent-demo"}; OP={"Authorization":"Bearer operator-demo"}; APPROVER={"Authorization":"Bearer approver-demo"}
+
+@pytest.fixture(autouse=True)
+def reset_local_state():
+    store.connection.execute("DELETE FROM incidents")
+    store.connection.execute("DELETE FROM remediation_guards")
+    store.connection.execute("DELETE FROM remediation_actions")
+    store.connection.commit()
+    executor.state["checkout-api"] = {"revision":"v2", "replicas":3, "healthy":False}
 def create(environment="production", fingerprint="bad-v2"):
     return client.post("/api/v1/incidents",headers=AGENT,json={"service":"checkout-api","namespace":"shop","environment":environment,"alert_name":"High5xx","fingerprint":fingerprint}).json()["id"]
 def test_bad_deployment_requires_approval_then_recovers():
@@ -23,4 +32,21 @@ def test_duplicate_alert_deduplicates_active_incident():
 def test_stale_plan_does_not_mutate():
     executor.state["checkout-api"]={"revision":"v2","replicas":6,"healthy":False}; incident=create("dev","stale")
     client.post(f"/api/v1/incidents/{incident}/investigate",headers=AGENT); client.post(f"/api/v1/incidents/{incident}/diagnose",headers=AGENT); client.post(f"/api/v1/incidents/{incident}/plan",headers=AGENT)
+    executor.state["checkout-api"]["replicas"] = 7
     assert client.post(f"/api/v1/incidents/{incident}/remediate",headers=OP).status_code==409
+
+def test_remediation_guard_enforces_cooldown(tmp_path):
+    from sre_agent.store import IncidentStore
+    guard = IncidentStore(str(tmp_path / "guard.db"))
+    assert guard.reserve_remediation("checkout-api", cooldown_seconds=60)[0]
+    assert not guard.reserve_remediation("checkout-api", cooldown_seconds=60)[0]
+
+def test_remediation_guard_enforces_action_budget_and_atomic_reservation(tmp_path):
+    from concurrent.futures import ThreadPoolExecutor
+
+    from sre_agent.store import IncidentStore
+    guard = IncidentStore(str(tmp_path / "budget.db"))
+    with ThreadPoolExecutor(max_workers=4) as workers:
+        outcomes = list(workers.map(lambda _: guard.reserve_remediation("checkout-api", cooldown_seconds=0, max_actions=1, window_seconds=60)[0], range(4)))
+    assert outcomes.count(True) == 1
+    assert guard.reserve_remediation("checkout-api", cooldown_seconds=0, max_actions=1, window_seconds=60) == (False, "remediation action budget exhausted")

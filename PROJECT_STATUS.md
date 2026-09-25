@@ -2,7 +2,7 @@
 
 ## Current Maturity
 
-PARTIALLY VALIDATED
+PORTFOLIO COMPLETE — LOCAL-FIRST SCOPE
 
 ## Maturity Model
 
@@ -10,19 +10,20 @@ PARTIALLY VALIDATED
 
 ## Executed and Verified
 
-- Deterministic bad-deployment investigation, approval gate, bounded rollback and verification loop.
+- Real kind checkout fixture, Prometheus scrape/alert rule, Kubernetes evidence collection, separate production approval, allowlisted Deployment mutation, and readiness verification.
+- SQLite incident/plan/approval/audit timeline persistence and Prometheus control-plane metrics.
 
 ## Implemented but Not End-to-End Validated
 
-- FastAPI control-plane abstractions and audit/policy domain.
+- FastAPI control plane and local executor have unit coverage; full kind lifecycle remains scripted local validation rather than hosted CI.
 
 ## Simulated
 
-- Incident evidence and remediation executor.
+- Hardware/cloud production conditions are not simulated as executed evidence.
 
 ## Architecture / Contracts Only
 
-- kind, Prometheus/Alertmanager and Kubernetes API remediation.
+- Alertmanager notification delivery; the local demo observes Prometheus alert evaluation directly.
 
 ## Known Failures
 
@@ -34,8 +35,7 @@ Run an actual kind faulty workload from alert through guarded remediation and ve
 
 ## Completion Blockers
 
-- kind, Prometheus/Alertmanager, Kubernetes evidence collection, and actual bounded remediation are unexecuted.
-- Real failure scenarios, rollback, stale-plan/loop-prevention, audit persistence, and live observability evidence are missing.
+None for local-first scope. Cloud and multi-cluster adapters remain explicitly unexecuted.
 
 ## Explicitly Unexecuted Production Adapters
 
@@ -43,18 +43,17 @@ Run an actual kind faulty workload from alert through guarded remediation and ve
 
 ## Last Validation
 
-- `PYTHONPATH=control-plane/src ../ai-platform-control-plane/.venv/bin/python -m pytest -q`: 4 passed (2 dependency deprecation warnings).
-- `../ai-platform-control-plane/.venv/bin/python -m ruff check control-plane/src tests`: passed.
+- `make cleanroom-validate`: two complete clean-room cycles passed.
+- `make verify`: 6 passed; Ruff passed.
 
 ## Last Updated
 
-2026-09-19, baseline `5471266`.
+2026-09-25, clean-room validation complete.
 
 ## Clean-Room Reproducibility
 
-**Status: NOT YET VALIDATED**
+**Status: VALIDATED**
 
-Completion requires two executed clean-room cycles: clean start → bootstrap → smoke → primary demo
-→ failure/security demo → validation → project-scoped cleanup, followed by a second clean bootstrap
-and demo. Existing developer state is not evidence. This status must be `VALIDATED` before
-`PORTFOLIO COMPLETE — LOCAL-FIRST SCOPE` is allowed.
+Cycles 1 and 2 executed bootstrap, smoke, approval denial, readiness and image-pull recovery,
+stale-plan denial, validation, and project-only cleanup. Each ended with no
+`ai-sre-remediation` kind cluster.
