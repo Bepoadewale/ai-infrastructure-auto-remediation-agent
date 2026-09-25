@@ -1,8 +1,16 @@
+import pytest
 from fastapi.testclient import TestClient
-from sre_agent.main import app, executor
+from sre_agent.main import app, executor, store
 
 client=TestClient(app)
 AGENT={"Authorization":"Bearer agent-demo"}; OP={"Authorization":"Bearer operator-demo"}; APPROVER={"Authorization":"Bearer approver-demo"}
+
+@pytest.fixture(autouse=True)
+def reset_local_state():
+    store.connection.execute("DELETE FROM incidents")
+    store.connection.execute("DELETE FROM remediation_guards")
+    store.connection.commit()
+    executor.state["checkout-api"] = {"revision":"v2", "replicas":3, "healthy":False}
 def create(environment="production", fingerprint="bad-v2"):
     return client.post("/api/v1/incidents",headers=AGENT,json={"service":"checkout-api","namespace":"shop","environment":environment,"alert_name":"High5xx","fingerprint":fingerprint}).json()["id"]
 def test_bad_deployment_requires_approval_then_recovers():
