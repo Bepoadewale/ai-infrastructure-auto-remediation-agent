@@ -2,7 +2,7 @@
 
 ## Current Maturity
 
-PARTIALLY VALIDATED
+LOCAL END-TO-END VALIDATED
 
 ## Maturity Model
 
@@ -10,19 +10,20 @@ PARTIALLY VALIDATED
 
 ## Executed and Verified
 
-- Deterministic bad-deployment investigation, approval gate, bounded rollback and verification loop.
+- Real kind checkout fixture, Prometheus scrape/alert rule, Kubernetes evidence collection, separate production approval, allowlisted Deployment mutation, and readiness verification.
+- SQLite incident/plan/approval/audit timeline persistence and Prometheus control-plane metrics.
 
 ## Implemented but Not End-to-End Validated
 
-- FastAPI control-plane abstractions and audit/policy domain.
+- FastAPI control plane and local executor have unit coverage; full kind lifecycle remains scripted local validation rather than hosted CI.
 
 ## Simulated
 
-- Incident evidence and remediation executor.
+- Hardware/cloud production conditions are not simulated as executed evidence.
 
 ## Architecture / Contracts Only
 
-- kind, Prometheus/Alertmanager and Kubernetes API remediation.
+- Alertmanager notification delivery; the local demo observes Prometheus alert evaluation directly.
 
 ## Known Failures
 
@@ -34,8 +35,9 @@ Run an actual kind faulty workload from alert through guarded remediation and ve
 
 ## Completion Blockers
 
-- kind, Prometheus/Alertmanager, Kubernetes evidence collection, and actual bounded remediation are unexecuted.
-- Real failure scenarios, rollback, stale-plan/loop-prevention, audit persistence, and live observability evidence are missing.
+- Add a second independent real failure class (for example dependency failure) and bounded recovery proof.
+- Add durable cooldown/action-budget concurrency protection and test it against the cluster path.
+- Execute and record two full clean-room cycles after the final scripts settle; add stable CI coverage for the kind path if practical.
 
 ## Explicitly Unexecuted Production Adapters
 
@@ -48,7 +50,7 @@ Run an actual kind faulty workload from alert through guarded remediation and ve
 
 ## Last Updated
 
-2026-09-19, baseline `5471266`.
+2026-09-25, Week 7 working branch (uncommitted validation in progress).
 
 ## Clean-Room Reproducibility
 

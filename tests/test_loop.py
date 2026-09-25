@@ -23,4 +23,5 @@ def test_duplicate_alert_deduplicates_active_incident():
 def test_stale_plan_does_not_mutate():
     executor.state["checkout-api"]={"revision":"v2","replicas":6,"healthy":False}; incident=create("dev","stale")
     client.post(f"/api/v1/incidents/{incident}/investigate",headers=AGENT); client.post(f"/api/v1/incidents/{incident}/diagnose",headers=AGENT); client.post(f"/api/v1/incidents/{incident}/plan",headers=AGENT)
+    executor.state["checkout-api"]["replicas"] = 7
     assert client.post(f"/api/v1/incidents/{incident}/remediate",headers=OP).status_code==409

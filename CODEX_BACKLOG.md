@@ -7,6 +7,17 @@ PORTFOLIO COMPLETE — LOCAL-FIRST SCOPE
 - Execute alert-driven kind remediation with observed evidence, bounded mutation, verification, and rollback.
 - Demonstrate dangerous denial, stale plan, loop prevention, and persistent audit/metrics.
 
+# Completion Target
+
+PORTFOLIO COMPLETE — LOCAL-FIRST SCOPE
+
+# Current Completion Blockers
+
+- [ ] Add and execute a second real failure/recovery scenario.
+- [ ] Add durable remediation cooldown, action budget, and lifecycle concurrency controls.
+- [ ] Validate failed remediation safe rollback/escalation against kind.
+- [ ] Run and record two full clean-room cycles.
+
 # P0 — Required for Portfolio Claim
 
 P0 blocks PORTFOLIO COMPLETE — LOCAL-FIRST SCOPE; do not choose P1/P2 work first.

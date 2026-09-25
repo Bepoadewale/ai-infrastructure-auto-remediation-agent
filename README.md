@@ -1,29 +1,41 @@
 # Governed AI SRE Auto-Remediation Platform
 
-A local-first control plane for evidence-backed incident investigation and bounded remediation. It separates AI-style diagnosis from authoritative policy, approval, executor preconditions, verification, and audit records.
+A local-first control plane that investigates Kubernetes incidents and performs only bounded, policy-authorized remediation. It gives an AI-style investigator read-only evidence access; deterministic policy, a separate approver, stale-state checks, and an allowlisted executor remain the authority for writes.
 
-```mermaid
-flowchart LR
- A[Alert or incident]-->I[Investigate: read-only tools]
- I-->D[Evidence-backed deterministic diagnosis]
- D-->P[Persisted remediation plan]
- P-->X[Policy + risk + approval]
- X-->E[Bounded executor]
- E-->V[Verify recovery]
- V-->R[Resolve, rollback, or escalate]
+```text
+Prometheus alert → incident → Kubernetes evidence → deterministic diagnosis
+→ immutable plan/preconditions → approval → bounded Kubernetes action
+→ readiness verification → durable audit + metrics
 ```
 
-## Working vertical slice
+## What it allows—and what it refuses
 
-The bad-deployment lab produces 5xx/readiness/deployment evidence, diagnoses a deployment regression, proposes rollback, blocks production execution until a separate approver acts, rechecks plan preconditions, rolls back, verifies health, and records a timeline. The executor is a deterministic local lab backend—not a claim of real Kubernetes validation.
+The local demo can inspect the `sre-remediation` namespace and execute one of four explicit actions: rollback a known checkout fixture, bounded scale, restart a Deployment, or delete a failed Pod. It cannot run arbitrary shell commands, pass through `kubectl`, delete namespaces, obtain cluster-admin credentials, or approve its own production change. A production action is denied until a separate approver authorizes the exact persisted plan; changed Kubernetes resource state causes a stale-plan rejection.
+
+## Executed local demonstration
+
+The primary demo creates a real kind cluster, deploys a healthy checkout fixture and Prometheus, injects a readiness regression, waits for the `CheckoutUnavailable` Prometheus alert, gathers Deployment/Pod/Event evidence through the Kubernetes API, requires production approval, patches the previous-known-good health setting, and waits for the Deployment to become Ready.
 
 ```bash
-python -m pip install -e '.[dev]'
-make test lint
-make demo-bad-deploy
-make demo-unsafe-plan
+make install
+make bootstrap-local
+make smoke
+make demo-rollback      # unapproved production mutation returns 403
+make demo-remediation   # real Kubernetes rollback and readiness verification
+make verify
+make clean-local
 ```
 
-The unsafe-plan demo proves `delete_namespace` is not an allowed capability. There is no arbitrary shell, kubectl passthrough, cluster-admin credential, or autonomous approval path.
+`make clean-local` deletes only the `ai-sre-remediation` kind cluster and this repository's `.local` state; it does not prune Docker globally or touch unrelated clusters.
 
-See [safety model](docs/safety-model.md), [lifecycle](docs/incident-lifecycle.md), and [roadmap](docs/roadmap.md).
+## Local architecture
+
+- FastAPI control plane with SQLite-backed incident, plan, approval, and timeline persistence.
+- Kubernetes Python client with exact action allowlist and resource-version preconditions.
+- Prometheus scraping the fixture and evaluating the alert rule.
+- Prometheus metrics at `/metrics`; audit timeline at `/api/v1/incidents/{id}/timeline`.
+- A deliberately tiny Python fixture image—this is an infrastructure-control demo, not a production workload benchmark.
+
+## Evidence boundary
+
+See [implementation status](docs/IMPLEMENTATION_STATUS.md) and [validation evidence](docs/VALIDATION.md). Multi-cluster operation, enterprise incident tooling, cloud credentials, and autonomous arbitrary remediation are not implemented or claimed.

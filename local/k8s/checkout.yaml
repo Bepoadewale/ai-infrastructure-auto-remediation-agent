@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: checkout-api
+  namespace: sre-remediation
+  labels:
+    app: checkout-api
+    app.kubernetes.io/part-of: ai-infrastructure-auto-remediation-agent
+spec:
+  strategy: {type: Recreate}
+  replicas: 1
+  selector:
+    matchLabels: {app: checkout-api}
+  template:
+    metadata:
+      labels: {app: checkout-api}
+    spec:
+      serviceAccountName: checkout-api
+      securityContext: {runAsNonRoot: true, seccompProfile: {type: RuntimeDefault}}
+      containers:
+        - name: checkout
+          image: autoremediation-checkout:local
+          imagePullPolicy: IfNotPresent
+          env: [{name: BROKEN, value: "0"}]
+          ports: [{containerPort: 8080, name: http}]
+          readinessProbe: {httpGet: {path: /ready, port: http}, initialDelaySeconds: 2, periodSeconds: 2}
+          livenessProbe: {httpGet: {path: /live, port: http}, initialDelaySeconds: 2, periodSeconds: 3}
+          securityContext: {allowPrivilegeEscalation: false, readOnlyRootFilesystem: true, capabilities: {drop: ["ALL"]}}
+          resources: {requests: {cpu: 25m, memory: 64Mi}, limits: {cpu: 250m, memory: 128Mi}}
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata: {name: checkout-api, namespace: sre-remediation}
+automountServiceAccountToken: false
+---
+apiVersion: v1
+kind: Service
+metadata: {name: checkout-api, namespace: sre-remediation, labels: {app: checkout-api}}
+spec:
+  selector: {app: checkout-api}
+  ports: [{name: http, port: 8080, targetPort: http}]

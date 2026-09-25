@@ -1,6 +1,6 @@
 # Validation
 
-Run `make test lint demo-bad-deploy demo-unsafe-plan`. A real remediation claim requires a kind workload, alert evidence, approval, Kubernetes API action, and health verification recorded with exact commands. Record versions, services, results, failure/rollback evidence, and environment assumptions; never fabricate validation.
+Run `make install`, `make bootstrap-local`, `make smoke`, `make demo-rollback`, `make demo-remediation`, and `make verify`. The primary demo uses a real kind workload, Prometheus alert evidence, approval, Kubernetes API action, and health verification. Record versions, services, results, failure/rollback evidence, and environment assumptions; never fabricate validation.
 
 ## Clean-Room Validation
 

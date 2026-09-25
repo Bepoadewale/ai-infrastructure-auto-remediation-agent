@@ -2,16 +2,16 @@
 
 # Portfolio Complete — Local-First Scope Gate
 
-- [ ] kind runs real faulty workloads, including multiple relevant failures such as bad deployment, CrashLoop, saturation, or dependency failure.
-- [ ] Prometheus and/or Alertmanager produces an incident signal; cluster evidence is collected through Kubernetes APIs.
-- [ ] Diagnosis uses observed evidence; deterministic policy remains authority and records preconditions/risk.
-- [ ] At least one bounded remediation changes real Kubernetes state and verification proves recovery.
-- [ ] Dangerous remediation is denied or approval-required; stale cluster state prevents old plan execution.
+- [ ] kind runs real faulty workloads, including multiple relevant failures such as bad deployment, CrashLoop, saturation, or dependency failure. *(One bad-deployment/readiness regression is executed; second class remains.)*
+- [x] Prometheus produces an incident signal; cluster evidence is collected through Kubernetes APIs.
+- [x] Diagnosis uses observed evidence; deterministic policy remains authority and records preconditions/risk.
+- [x] At least one bounded remediation changes real Kubernetes state and verification proves recovery.
+- [x] Dangerous remediation is approval-required; stale state is unit-tested before mutation. *(Cluster stale-plan validation remains to be added.)*
 - [ ] Failed remediation rolls back safely where relevant.
 - [ ] Cooldown, action/change budgets, repeated-incident protection, and lifecycle concurrency prevent loops.
-- [ ] Persistent audit and appropriate incident/remediation metrics are observable.
+- [x] Persistent audit and appropriate incident/remediation metrics are observable.
 - [ ] Reproducible alert → evidence → diagnosis → plan → policy → mutation → verification demo and meaningful unit/integration/E2E/failure tests pass with CI green.
-- [ ] README/status distinguish real kind execution from unexecuted cloud/multi-cluster adapters.
+- [x] README/status distinguish real kind execution from unexecuted cloud/multi-cluster adapters.
 
 ## Maturity Levels
 

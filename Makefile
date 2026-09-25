@@ -1,11 +1,33 @@
-PYTHON ?= python3
+VENV ?= .venv
+PYTHON ?= $(VENV)/bin/python
 export PYTHONPATH := control-plane/src
-.PHONY: test lint demo-bad-deploy demo-unsafe-plan
+.PHONY: install test lint bootstrap-local smoke demo-remediation demo-rollback verify clean-local
+
+install:
+	@if [ -x $(VENV)/bin/python ] && ! $(VENV)/bin/python -c 'import sys; raise SystemExit(sys.version_info[:2] != (3, 12))'; then rm -rf $(VENV); fi
+	python3.12 -m venv $(VENV)
+	$(PYTHON) -m pip install --upgrade pip
+	$(PYTHON) -m pip install -e '.[dev]'
+
 test:
 	$(PYTHON) -m pytest -q
+
 lint:
-	$(PYTHON) -m ruff check control-plane/src tests
-demo-bad-deploy:
-	$(PYTHON) -m pytest tests/test_loop.py::test_bad_deployment_requires_approval_then_recovers -q
-demo-unsafe-plan:
-	$(PYTHON) -m pytest tests/test_loop.py::test_unsafe_action_is_not_a_capability -q
+	$(PYTHON) -m ruff check control-plane/src tests local
+
+bootstrap-local:
+	./scripts/bootstrap-local.sh
+
+smoke:
+	./scripts/smoke.sh
+
+demo-remediation:
+	./scripts/demo-remediation.sh
+
+demo-rollback:
+	./scripts/demo-rollback.sh
+
+verify: test lint
+
+clean-local:
+	./scripts/clean-local.sh

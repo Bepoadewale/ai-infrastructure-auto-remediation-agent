@@ -2,10 +2,14 @@
 
 | Capability | Status | Validation |
 | --- | --- | --- |
-| Guarded local remediation loop | ✅ EXECUTED LOCALLY | pytest demos |
-| Incident evidence/executor | 🔵 SIMULATED | deterministic lab |
-| Kubernetes/Prometheus path | 📋 Planned | Week 7 P0 |
-| Autonomous remediation | ❌ Broken | intentionally not permitted |
+| Guarded remediation API + SQLite timeline | ✅ EXECUTED LOCALLY | FastAPI demo + restartable SQLite file |
+| kind fixture and Kubernetes API evidence | ✅ EXECUTED LOCALLY | `make demo-remediation` |
+| Prometheus alert evaluation | ✅ EXECUTED LOCALLY | `CheckoutUnavailable` local rule |
+| Bounded deployment rollback + readiness verification | ✅ EXECUTED LOCALLY | `make demo-remediation` |
+| Production approval denial | ✅ EXECUTED LOCALLY | `make demo-rollback` |
+| Alertmanager notification delivery | 🟡 IMPLEMENTED / NOT FULLY EXECUTED | Prometheus rule evaluated directly |
+| Second failure class / loop budget | 📋 ROADMAP | completion blocker |
+| Autonomous arbitrary remediation | ❌ Broken | intentionally prohibited |
 
 ## Clean-room evidence boundary
 
