@@ -39,3 +39,7 @@ make clean-local
 ## Evidence boundary
 
 See [implementation status](docs/IMPLEMENTATION_STATUS.md) and [validation evidence](docs/VALIDATION.md). Multi-cluster operation, enterprise incident tooling, cloud credentials, and autonomous arbitrary remediation are not implemented or claimed.
+
+## Temporary public API demo
+
+`make public-demo` bootstraps the local kind lab, runs the bounded remediation scenario, and prints a temporary Cloudflare Quick Tunnel URL for the local FastAPI documentation. It uses no Cloudflare account, named tunnel, or persistent credential. The URL is public, changes every run, and must never be committed; it is for disposable local evidence only. Keep the terminal running while shared; `Ctrl-C` stops only the tunnel and `make clean-local` removes project-owned resources.
